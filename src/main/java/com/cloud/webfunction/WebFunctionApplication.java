@@ -2,13 +2,19 @@ package com.cloud.webfunction;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
+import com.cloud.webfunction.toll.TollRecord;
 import com.cloud.webfunction.toll.TollStation;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @SpringBootApplication
 public class WebFunctionApplication {
@@ -42,6 +48,41 @@ public class WebFunctionApplication {
 
 		};
 	}
+
+	@Bean
+	public Consumer<TollRecord> processTollRecord()
+	{
+		//logic to save the toll
+		return value ->	  System.out.println(value);
+	}
+
+	@Bean
+	public Function<TollRecord, Mono<Void>> processTollRecordReactive ()
+    {
+        return value ->
+        {
+            System.out.println("Received reactive toll for car: " + value);
+            return Mono.empty();
+        };
+    }
+
+	@Bean
+	public Consumer<Flux<TollRecord>> processListOfTollRecordsReactive()
+	{
+		return value ->
+		{
+			value.subscribe(System.out::println);
+		};
+	}
 	
+	@Bean
+	public Supplier<Flux<TollStation>> getTollStattions()
+	{
+		tollStations.stream()
+					.forEach(System.out::println);
+
+		return () -> Flux.fromIterable(tollStations);
+	}
+
 
 }
